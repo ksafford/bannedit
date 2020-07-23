@@ -108,7 +108,7 @@
 (bannedit-unhighlight-all bannedit-words)
 
 (defun bannedit-toggle-bannedit ()
-  "Toggle highlighting of the bannedit-words list. In case you want to keep the mode active but remove or re-enable highlighting."
+  "Toggle highlighting of the 'bannedit-words' list. In case you want to keep the mode active but remove or re-enable highlighting."
   (interactive)
   (if bannedit-switch
       (progn
