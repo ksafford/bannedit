@@ -58,8 +58,9 @@
              (bannedit-unhighlight-all bannedit-words)
              (setq bannedit-switch nil))
          (progn
-           (bannedit-highlight-bad-words bannedit-words)
+           (bannedit-highlight-banned-words bannedit-words)
            (setq bannedit-switch t))))
+
 (define-minor-mode bannedit-mode
   "Highlight banned words and remove them with extreme prejudice."
   :lighter " bannedit"
@@ -92,10 +93,10 @@
                          ))
 
   (if bannedit-mode (progn
-                      (setq bannedit-switch t)
+                      (let ((bannedit-switch t)))
                       (bannedit-highlight-banned-words bannedit-words))
     (progn
-      (setq bannedit-switch nil)
+      (let ((bannedit-switch nil)))
       (bannedit-unhighlight-all bannedit-words))))
 
 (provide 'bannedit)
