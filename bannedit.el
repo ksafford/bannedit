@@ -1,10 +1,13 @@
-;;; bannedit.el --- Highlight banned words and summarily expel them.
+;;; bannedit.el --- Highlight banned words and summarily expel them -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2020 by Kevin Safford
 ;;
 ;; Author: Ric Lister
 ;; URL: https://github.com/ksafford/bannedit
-;;
+;; Package-Requires: ((emacs "24"))
+;; Version: 1.0
+;; Keywords: matching wp
+
 ;; This file is not part of GNU Emacs.
 ;;
 ;; This program is free software; you can redistribute it and/or
@@ -29,7 +32,6 @@
 ;; The idea is to highlight and commonly used weak words for easy
 ;; identification
 
-;; -*- lexical-binding: t -*-
 
 ;; TODO: Edit the regex so "e.g." will match
 ;; TODO: Setup customize group to accept a face to use and the list of banned words
@@ -91,8 +93,7 @@
                           "I think"
                           "I believe"
                           "it seems"
-                          "to be"
-                          ))))
+                          "to be"))))
 
   (if bannedit-mode (progn
                       (let ((bannedit-switch t)))
@@ -102,3 +103,5 @@
       (bannedit-unhighlight-all bannedit-words))))
 
 (provide 'bannedit)
+
+;;; bannedit.el ends here
