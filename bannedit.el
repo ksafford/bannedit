@@ -31,14 +31,18 @@
 
 ;; -*- lexical-binding: t -*-
 
-;; TODO: Make the matching case insensitive
-;; TODO: Figure out how to use let instead of setq
 ;; TODO: Edit the regex so "e.g." will match
 ;; TODO: Setup customize group to accept a face to use and the list of banned words
-;; TODO: Figure out how to import this to spacemacs
+
+("therefore" "Therefore" "atherefore" "thereforeo")
+
+(defun bannedit-phrase-to-case-insensitive-regex (phrase) ()
+       (mapconcat (lambda (c) (concat "\\(" (upcase (char-to-string c)) "\\|"  (char-to-string c) "\\)" )) phrase ""))
 
 (defun bannedit-match-phrase-exactly (phrase) ()
-       (concat "\\b" phrase "\\b"))
+       (concat "\\b" (bannedit-phrase-to-case-insensitive-regex phrase)  "\\b"))
+
+(bannedit-match-phrase-exactly "therefore")
 
 (defun bannedit-highlight-exact-phrase-in-blue (p) ()
        (highlight-phrase (bannedit-match-phrase-exactly p) 'anzu-match-1))
@@ -65,32 +69,32 @@
   "Highlight banned words and remove them with extreme prejudice."
   :lighter " bannedit"
 
-  (setq bannedit-face 'anzu-match-1)
-  (setq bannedit-words '(
-                         "just"
-                         "that"
-                         "already"
-                         "actual"
-                         "actually"
-                         "think"
-                         "pretty"
-                         "really"
-                         "to be"
-                         "great"
-                         "around"
-                         "a lot"
-                         "very"
-                         "thing"
-                         "much"
-                         "nice"
-                         "e\.g\."
-                         "therefore"
-                         "again"
-                         "I think"
-                         "I believe"
-                         "it seems"
-                         "to be"
-                         ))
+  (let ((bannedit-face 'anzu-match-1)
+        (bannedit-words '(
+                          "just"
+                          "that"
+                          "already"
+                          "actual"
+                          "actually"
+                          "think"
+                          "pretty"
+                          "really"
+                          "to be"
+                          "great"
+                          "around"
+                          "a lot"
+                          "very"
+                          "thing"
+                          "much"
+                          "nice"
+                          "e\.g\."
+                          "therefore"
+                          "again"
+                          "I think"
+                          "I believe"
+                          "it seems"
+                          "to be"
+                          ))))
 
   (if bannedit-mode (progn
                       (let ((bannedit-switch t)))
