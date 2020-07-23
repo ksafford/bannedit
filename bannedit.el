@@ -34,8 +34,6 @@
 ;; TODO: Edit the regex so "e.g." will match
 ;; TODO: Setup customize group to accept a face to use and the list of banned words
 
-("therefore" "Therefore" "atherefore" "thereforeo")
-
 (defun bannedit-phrase-to-case-insensitive-regex (phrase) ()
        (mapconcat (lambda (c) (concat "\\(" (upcase (char-to-string c)) "\\|"  (char-to-string c) "\\)" )) phrase ""))
 
