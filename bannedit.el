@@ -55,23 +55,24 @@
 (defun bannedit-toggle-bannedit () (interactive)
        (if bannedit-switch
            (progn
-             (bannedit-unhighlight-all badwords)
+             (bannedit-unhighlight-all bannedit-words)
              (setq bannedit-switch nil))
          (progn
-           (bannedit-highlight-bad-words badwords)
+           (bannedit-highlight-bad-words bannedit-words)
            (setq bannedit-switch t))))
 
 (define-minor-mode bannedit-mode
   "Highlight banned words and remove them with extreme prejudice."
   :lighter " bannedit"
 
+  (setq bannedit-face 'anzu-match-1)
+  (setq bannedit-words '("just" "that" "already" "actual" "actually" "think" "pretty" "really" "to be" "great" "around" "a lot" "very" "thing" "much" "nice" "e.g." "therefor" "again" "I think" "I believe" "it seems" "to be"))
+
   (if bannedit-mode (progn
                       (setq bannedit-switch t)
-                      (setq bannedit-face 'anzu-match-1)
-                      (setq bannedit-words '("just" "that" "already" "actual" "actually" "think" "pretty" "really" "to be" "great" "around" "a lot" "very" "thing" "much" "nice" "e.g." "therefor" "again" "I think" "I believe" "it seems" "to be"))
                       (bannedit-highlight-banned-words bannedit-words))
     (progn
-      (setq bannedit-mode-switch nil)
+      (setq bannedit-switch nil)
       (bannedit-unhighlight-all bannedit-words))))
 
 (provide 'bannedit)
