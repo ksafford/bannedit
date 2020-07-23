@@ -47,7 +47,7 @@
        (mapcar #'bannedit-highlight-exact-phrase-in-blue badwords))
 
 (defun bannedit-unhighlight (p) ()
-       (unhighlight-regexp (match-phrase-exactly p)))
+       (unhighlight-regexp (bannedit-match-phrase-exactly p)))
 
 (defun bannedit-unhighlight-all (badwords) ()
      (mapcar #'bannedit-unhighlight badwords))
