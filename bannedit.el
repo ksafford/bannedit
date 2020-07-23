@@ -5,7 +5,7 @@
 ;; Author: Ric Lister
 ;; URL: https://github.com/ksafford/bannedit
 ;; Package-Requires: ((emacs "24"))
-;; Version: 1.0
+;; Package-Version: 1.0
 ;; Keywords: matching wp
 
 ;; This file is not part of GNU Emacs.
@@ -32,10 +32,47 @@
 ;; The idea is to highlight and commonly used weak words for easy
 ;; identification
 
-
 ;;; Code:
 ;; TODO: Edit the regex so "e.g." will match
-;; TODO: Setup customize group to accept a face to use and the list of banned words
+
+(defcustom bannedit-words
+  '(
+   "just"
+   "that"
+   "already"
+   "actual"
+   "actually"
+   "think"
+   "pretty"
+   "really"
+   "to be"
+   "great"
+   "around"
+   "a lot"
+   "very"
+   "thing"
+   "much"
+   "nice"
+   "eg"
+   "e\.g\."
+   "therefore"
+   "again"
+   "I think"
+   "I believe"
+   "it seems"
+   "to be")
+  "Weak and over-used words or phrases you should consider removing or replacing in your writing."
+  :type 'list
+  :group 'bannedit)
+
+(sequencep bannedit-words)
+
+(defcustom bannedit-face 'anzu-match-1
+  "Face to use when highlighting banned words."
+  :type 'face
+  :group 'bannedit)
+
+(defvar bannedit-switch t)
 
 (defun bannedit-phrase-to-case-insensitive-regex (phrase)
   "Transform PHRASE into a regex string that will match PHRASE with any capitalization."
@@ -47,17 +84,15 @@
   ()
   (concat "\\b" (bannedit-phrase-to-case-insensitive-regex phrase)  "\\b"))
 
-(bannedit-match-phrase-exactly "therefore")
-
-(defun bannedit-highlight-exact-phrase-in-blue (p)
+(defun bannedit-highlight-exact-phrase-with-face (p)
   "Really just a partial function for 'highlight-phrase' taking only P, but with a FACE selected."
   ()
-       (highlight-phrase (bannedit-match-phrase-exactly p) 'anzu-match-1))
+       (highlight-phrase (bannedit-match-phrase-exactly p) bannedit-face))
 
 (defun bannedit-highlight-banned-words (badwords)
   "Core function. Highlight all words in the list BADWORDS."
   ()
-  (mapcar #'bannedit-highlight-exact-phrase-in-blue badwords))
+  (mapcar #'bannedit-highlight-exact-phrase-with-face badwords))
 
 (defun bannedit-unhighlight (p)
   "Inverse of 'bannedit-highlight-exact-phrase'. Unhighlights occurrences of P."
@@ -69,52 +104,29 @@
   ()
   (mapcar #'bannedit-unhighlight badwords))
 
+(bannedit-highlight-banned-words bannedit-words)
+(bannedit-unhighlight-all bannedit-words)
+
 (defun bannedit-toggle-bannedit ()
   "Toggle highlighting of the bannedit-words list. In case you want to keep the mode active but remove or re-enable highlighting."
   (interactive)
-       (if bannedit-switch
-           (progn
-             (bannedit-unhighlight-all bannedit-words)
-             (setq bannedit-switch nil))
-         (progn
-           (bannedit-highlight-banned-words bannedit-words)
-           (setq bannedit-switch t))))
+  (if bannedit-switch
+      (progn
+        (bannedit-unhighlight-all bannedit-words)
+        (setf bannedit-switch nil))
+    (progn
+      (bannedit-highlight-banned-words bannedit-words)
+      (setf bannedit-switch t))))
 
 (define-minor-mode bannedit-mode
   "Highlight banned words and remove them with extreme prejudice."
   :lighter " bannedit"
 
-  (let ((bannedit-face 'anzu-match-1)
-        (bannedit-words '(
-                          "just"
-                          "that"
-                          "already"
-                          "actual"
-                          "actually"
-                          "think"
-                          "pretty"
-                          "really"
-                          "to be"
-                          "great"
-                          "around"
-                          "a lot"
-                          "very"
-                          "thing"
-                          "much"
-                          "nice"
-                          "e\.g\."
-                          "therefore"
-                          "again"
-                          "I think"
-                          "I believe"
-                          "it seems"
-                          "to be"))))
-
   (if bannedit-mode (progn
-                      (let ((bannedit-switch t)))
+                      (setf bannedit-switch t)
                       (bannedit-highlight-banned-words bannedit-words))
     (progn
-      (let ((bannedit-switch nil)))
+      (setf bannedit-switch nil)
       (bannedit-unhighlight-all bannedit-words))))
 
 (provide 'bannedit)
