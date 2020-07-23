@@ -65,7 +65,31 @@
   :lighter " bannedit"
 
   (setq bannedit-face 'anzu-match-1)
-  (setq bannedit-words '("just" "that" "already" "actual" "actually" "think" "pretty" "really" "to be" "great" "around" "a lot" "very" "thing" "much" "nice" "e\.g\." "therefore" "again" "I think" "I believe" "it seems" "to be"))
+  (setq bannedit-words '(
+                         "just"
+                         "that"
+                         "already"
+                         "actual"
+                         "actually"
+                         "think"
+                         "pretty"
+                         "really"
+                         "to be"
+                         "great"
+                         "around"
+                         "a lot"
+                         "very"
+                         "thing"
+                         "much"
+                         "nice"
+                         "e\.g\."
+                         "therefore"
+                         "again"
+                         "I think"
+                         "I believe"
+                         "it seems"
+                         "to be"
+                         ))
 
   (if bannedit-mode (progn
                       (setq bannedit-switch t)
