@@ -1,6 +1,6 @@
-;; -*- lexical-binding: t -*-
+;;; bannedit.el --- Highlight banned words and summarily expel them.
 
-;;; bannedit.el
+;; -*- lexical-binding: t -*-
 
 ;; TODO: Make the matching case insensitive
 ;; TODO: Figure out how to use let instead of setq
