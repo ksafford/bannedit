@@ -64,14 +64,11 @@
   :type 'list
   :group 'bannedit)
 
-(defcustom bannedit-face 'bannedit-highlight
-  "Face to use when highlighting banned words."
-  :type 'face
-  :group 'bannedit)
-
 (defface bannedit-highlight '((t :inherit highlight))
   "Face for highlighting phrases in 'bannedit-mode'."
   :group 'bannedit)
+
+(defvar bannedit-face 'bannedit-highlight)
 
 (defvar bannedit-switch t)
 
