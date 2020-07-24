@@ -5,32 +5,31 @@
 ;; Author: Ric Lister
 ;; URL: https://github.com/ksafford/bannedit
 ;; Package-Requires: ((emacs "24"))
-;; Package-Version: 1.0
+;; Package-Version: 1.0.0
 ;; Keywords: matching wp
 
 ;; This file is not part of GNU Emacs.
 ;;
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 3 of the
-;; License, or any later version.
+;; This program is free software; you can redistribute it and/or modify it under
+;; the terms of the GNU General Public License as published by the Free Software
+;; Foundation; either version 3 of the License, or any later version.
 ;;
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; This program is distributed in the hope -that- it will be useful, but WITHOUT
+;; ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+;; FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+;; details.
 ;;
-;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; if not, write to the Free Software
-;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-;; 02111-1307, USA.
+;; You should have received a copy of the GNU General Public License along with
+;; GNU Emacs; if not, write to the Free Software Foundation, Inc., 59 Temple
+;; Place - Suite 330, Boston, MA 02111-1307, USA.
 ;;
 ;;; Commentary:
 ;;
-;; This was inspired by thie post by Nat Eliason:
-;;  https://www.nateliason.com/blog/better-writer
-;; The idea is to highlight and commonly used weak words for easy
-;; identification
+;; This minor mode was inspired by thie post by Nat Eliason:
+;;  https://www.nateliason.com/blog/better-writer The idea is to highlight
+;;  commonly used weak words for easy identification. The
+;;  'bannedit-banned-words' can be words or phrases. Hihglighting of banned
+;;  words is dynamic.
 
 ;;; Code:
 ;; TODO: Edit the regex so "e.g." will match
@@ -114,10 +113,10 @@
       (progn
         (bannedit-unhighlight-all bannedit-words)
         (setf bannedit-switch nil))
-    (progn
-      (bannedit-highlight-banned-words bannedit-words)
-      (setf bannedit-switch t))))
+    (bannedit-highlight-banned-words bannedit-words)
+    (setf bannedit-switch t)))
 
+;;;###autoload
 (define-minor-mode bannedit-mode
   "Highlight banned words and remove them with extreme prejudice."
   :lighter " bannedit"
@@ -125,9 +124,8 @@
   (if bannedit-mode (progn
                       (setf bannedit-switch t)
                       (bannedit-highlight-banned-words bannedit-words))
-    (progn
-      (setf bannedit-switch nil)
-      (bannedit-unhighlight-all bannedit-words))))
+    (setf bannedit-switch nil)
+    (bannedit-unhighlight-all bannedit-words)))
 
 (provide 'bannedit)
 
