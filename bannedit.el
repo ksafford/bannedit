@@ -25,7 +25,7 @@
 ;;
 ;;; Commentary:
 ;;
-;; This minor mode was inspired by thie post by Nat Eliason:
+;; This minor mode was inspired by this post by Nat Eliason:
 ;;  https://www.nateliason.com/blog/better-writer The idea is to highlight
 ;;  commonly used weak words for easy identification. The
 ;;  'bannedit-banned-words' can be words or phrases. Hihglighting of banned
