@@ -22,3 +22,13 @@ Then in `dotspacemacs-user-config` add `(require 'bannedit)`.
 
 ### Otherwise
 Clone this repo and add `(add-to-list 'load-path "~/path/to/bannedit/")` to your config. Then `(require 'bannedit)`.
+
+## Related packages
+After having created this package, several helpful commenters have alerted me to the existence of some very nice, much more fully-featured packages:
+
+[writegood-mode](https://github.com/bnbeckwith/writegood-mode) offers a similar feature with `writegood-weasel-words` plus lots of other helpful tools.
+
+flycheck can also use the [proselint](https://github.com/amperser/proselint) linter to provide all kinds of warnings for weasel words, offensive terms, jargon, cliches, and more.
+
+## Credits
+Credit to [protesilaos](https://github.com/protesilaos) for the gorgeous [modus-operandi theme](https://gitlab.com/protesilaos/modus-themes) shown in the gif above, as well as for some helpful advice on working with faces.
