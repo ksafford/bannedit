@@ -9,6 +9,10 @@ With bannedit-mode enabled, toggle highlighting with `bannedit-toggle-bannedit`.
 
 You can customize the face used to highlight banned words or edit the banned words list with `bannedit-face` and `bannedit-words`.
 
+## Screencast
+
+![](screencast.gif)
+
 ## Installation
 
 ### Spacemacs
