@@ -30,13 +30,13 @@
 ;;; Code:
 ;; TODO: This only works if org-list-use-circular-motion is nil. Otherwise
 ;;  org-next-item will cycle forever. Fix that.
-;;
-;; TODO: Require org-mode
 
+(require 'org)
 
-(defvar eightfold-section-template "* \n  -\n  -\n  -\n  -\n  -\n  -\n  -\n  -\n  -\n  -\n")
-(defvar eightfold-steps-alist
-      '((1 . "Write outline in headlines.")
+(defvar 8fold-section-template "* \n  - \n  - \n  - \n  - \n  - \n  - \n  - \n  - \n  - \n  - \n")
+(defvar 8fold-steps-alist
+      '((0 . "Welcome to 8fold.")
+        (1 . "Write outline in headlines.")
         (2 . "Write about 10 sentences per section.")
         (3 . "Re-write each sentence")
         (4 . "Read each sentence aloud and select one to keep.")
@@ -44,15 +44,23 @@
         (6 . "Read through the draft.")
         (7 . "Without looking at the current draft, write a new outline.")
         (8 . "Copy sentences from the draft into the new outline. Delete as needed.")))
-(defvar eightfold-current-step 1)
 
-(defun eightfold-add-section ()
+(defvar 8fold-current-step 1)
+
+(defun 8fold-now-what ()
+  "Inform user about the current step."
+  (interactive)
+  (message
+   (format-message "Next: %s" 
+                   (alist-get 8fold-current-step 8fold-steps-alist))))
+
+(defun 8fold-add-section ()
   "Add a section to an outline."
   (interactive)
   (goto-char (point-max))
-  (insert eightfold-section-template))
+  (insert 8fold-section-template))
 
-(defun eightfold-create-outline (filename &optional n)
+(defun 8fold-create-outline (filename &optional n)
   "Create an outline structure with N headlines, 3 being the default.  Save it to FILENAME."
   (interactive "BEnter the name of the outline:
 nEnter the number of sections:")
@@ -61,31 +69,32 @@ nEnter the number of sections:")
     (create-file-buffer filename)
     (switch-to-buffer filename)
     (while (> inserted 0)
-      (call-interactively 'eightfold-add-section)
+      (call-interactively '8fold-add-section)
       (setq inserted (- inserted 1)))
     (beginning-of-buffer)
     (forward-char)
     (write-file filename)))
 
-(defun eightfold-add-next-list-item ()
-  "Add a single list item.  Return a value indicating if we're still in a list.  Used by eightfold-interleave."
+(defun 8fold-add-next-list-item ()
+  "Add a single list item.  Return a value indicating if we're still in a list.  Used by 8fold-interleave."
   (end-of-line)
   (org-insert-item)
   (org-next-item)
   (org-in-item-p))
 
-(defun eightfold-interleave-in-heading ()
+(defun 8fold-interleave-in-heading ()
   "Add a new line after each sentence in a single heading."
   (let ((users-org-list-use-circular-motion org-list-use-circular-motion)
-        (eightfold-still-in-list-p t))
+        (8fold-still-in-list-p t))
     (setq org-list-use-circular-motion nil)
     (org-beginning-of-item-list)
-    (while eightfold-still-in-list-p
-      (setq eightfold-still-in-list-p (eightfold-add-next-list-item)))
+    (while 8fold-still-in-list-p
+      (setq 8fold-still-in-list-p (8fold-add-next-list-item)))
     ;; Reset org-next-item to whatever the user had it before invoking.
     (setq org-list-use-circular-motion users-org-list-use-circular-motion)))
 
-(defun eightfold-interleave ()
+;; TODO mark the location and return to it after interleave, somehow
+(defun 8fold-interleave ()
   "Interleave all headings."
   (interactive)
   (beginning-of-buffer)
@@ -93,13 +102,14 @@ nEnter the number of sections:")
   (while 't
     (progn
       (next-line)
-      (eightfold-interleave-in-heading)
+      (8fold-interleave-in-heading)
       (call-interactively #'org-next-visible-heading))))
 
 ;; TODO improve this function: list items might be indicated by:
 ;; arrows, number with a dot like 1. or a paren like 1), etc.
 ;; but the regex for empty-item-p only checks for a dash
-(defun eightfold-heading-or-item-is-blank-p ()
+;; Perhaps a clever use of org-item-re would help
+(defun 8fold-heading-or-item-is-blank-p ()
   "Is the org heading or item on this line blank?"
   (interactive)
   (let(
@@ -112,25 +122,79 @@ nEnter the number of sections:")
                              (or empty-item-p "nil")))  
     (or empty-heading-p empty-item-p)))
 
-
-(defun eightfold-cleanup ()
+;; TODO mark location and return to it after, somehow
+(defun 8fold-cleanup ()
   "Remove unused headlines and list items."
   (interactive)
   (beginning-of-buffer)
   (while 't
-    (if (eightfold-heading-or-item-is-blank-p) 
+    (if (8fold-heading-or-item-is-blank-p) 
         (kill-whole-line)
-      (next-line))))
+      (forward-line))))
 
-(defun eightfold-convert-to-paragraphs ()
-  "Take the org structured document and convert it to paragraphs.")
+(defun 8fold-convert-to-paragraphs ()
+  "Take the org structured document and convert it to paragraphs."
+  (interactive)
+  (end-of-buffer)
+  (while (not (eq (point) (point-min)))
+    (if (org-at-heading-p) (progn
+                            (beginning-of-line)
+                            (delete-char 2)
+                            (newline))
+        ())
+    (if (org-at-item-p) (progn 
+                          (org-delete-indentation)
+                          (delete-char 2))
+      (forward-line -1))))
 
-(defun eightfold-archive-line ()
+(defun 8fold-archive-line ()
   "Send the current line to the archive.")
 
+(defun 8fold-iterate-and-select ()
+  "Iterate through pairs of sentences and select one from the pair to keep. Archive the other.")
+
+(defvar 8fold-step-actions-alist
+  '((1 . (call-interactively #'8fold-create-outline))
+    (2 . (call-interactively #'8fold-cleanup))
+    (3 . (call-interactively #'8fold-interleave))
+    (4 . (call-interactively #'8fold-iterate-and-select))
+    (5.  (call-interactively #'8fold-reordser))
+    (6 . (call-interactively #'8fold-convert-to-paragraphs-and-read))
+    (7 . (call-interactively #'8fold-rewrite-outline))
+    (8 . (call-interactively #'8fold-fillin-new-from-old))))
+
+(defvar 8fold-step-from-to-alist
+  '((0 . 1)
+    (1 . 2)
+    (2 . 3)
+    (3 . 4)
+    (4 . 5)
+    (5 . 6)
+    (6 . 7)
+    (7 . 8)
+    (8. 2)))
+
+(defun 8fold-goto-step ()
+  "Go to the Nth 8fold-step."
+  (interactive) 
+  (setq 8fold-current-step
+        (string-to-number (read-string
+                          (apply 'format "Select a step to jump to:\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s" 8fold-steps-alist))))
+  (message (format-message "%s" (alist-get 8fold-current-step 8fold-steps-alist))))
+
+(defun 8fold-step ()
+  "Perform the next step in the 8fold process."
+  (interactive)
+  
+  (let ((current-function (alist-get 8fold-current-step 8fold-step-actions-alist)))
+    (eval current-function)
+    (setq 8fold-current-step (alist-get 8fold-current-step 8fold-step-from-to-alist)))
+  
+  (message (format-message "%s" (alist-get 8fold-current-step 8fold-steps-alist))))
+
 ;;;###autoload
-(define-minor-mode eightfold-mode
+(define-minor-mode 8fold-mode
   "An 8-step editing process."
   :lighter " 8")
 
-;;; eightfold.el ends here
+;;; 8fold.el ends here
