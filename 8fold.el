@@ -57,23 +57,30 @@
 (defun 8fold-add-section ()
   "Add a section to an outline."
   (interactive)
-  (goto-char (point-max))
   (insert 8fold-section-template))
 
-(defun 8fold-create-outline (filename &optional n)
+(defun 8fold-add-archive-section ()
+  "Add an archive for sentences that have been replaced or removed."
+  (goto-char (point-max))
+  (insert "* Archive"))
+
+(defun 8fold-create-outline (name &optional n)
   "Create an outline structure with N headlines, 3 being the default.  Save it to FILENAME."
   (interactive "BEnter the name of the outline:
 nEnter the number of sections:")
   (let* ((n (or n 3))
-        (inserted n))
-    (create-file-buffer filename)
-    (switch-to-buffer filename)
-    (while (> inserted 0)
-      (call-interactively '8fold-add-section)
-      (setq inserted (- inserted 1)))
+        (inserted 0)
+        (name (file-name-with-extension name "org")))
+    (create-file-buffer name)
+    (switch-to-buffer name)
+    (set-auto-mode)
+    (while (< inserted n)
+      (call-interactively #'8fold-add-section)
+      (setq inserted (+ inserted 1)))
+    (8fold-add-archive-section)
     (beginning-of-buffer)
     (forward-char)
-    (write-file filename)))
+    (write-file name)))
 
 (defun 8fold-add-next-list-item ()
   "Add a single list item.  Return a value indicating if we're still in a list.  Used by 8fold-interleave."
@@ -122,46 +129,100 @@ nEnter the number of sections:")
                              (or empty-item-p "nil")))  
     (or empty-heading-p empty-item-p)))
 
-;; TODO mark location and return to it after, somehow
+(defun 8fold-in-archive ()
+  "Check if the cursor is in the Archive tree."
+  (let ((this-heading (org-get-heading 't 't 't 't)))
+    (string-equal "Archive" this-heading)))
+
 (defun 8fold-cleanup ()
   "Remove unused headlines and list items."
   (interactive)
-  (beginning-of-buffer)
-  (while 't
-    (if (8fold-heading-or-item-is-blank-p) 
-        (kill-whole-line)
-      (forward-line))))
+  (let ((starting-point (point)))
+    (beginning-of-buffer)
+    (while (not (8fold-in-archive))
+      (if (8fold-heading-or-item-is-blank-p) 
+          (kill-whole-line)
+        (forward-line)))
+    (goto-char starting-point)))
 
 (defun 8fold-convert-to-paragraphs ()
   "Take the org structured document and convert it to paragraphs."
   (interactive)
   (end-of-buffer)
+  
+  (while (8fold-in-archive)
+    (forward-line -1))
+
   (while (not (eq (point) (point-min)))
     (if (org-at-heading-p) (progn
-                            (beginning-of-line)
-                            (delete-char 2)
-                            (newline))
-        ())
+                             (beginning-of-line)
+                             (delete-char 2)
+                             (newline)))
     (if (org-at-item-p) (progn 
                           (org-delete-indentation)
                           (delete-char 2))
       (forward-line -1))))
 
 (defun 8fold-archive-line ()
-  "Send the current line to the archive.")
+  "Send the current line to the archive, if it exists, create it and send the line if it doesn't."
+  (interactive)
+  (let ((start-point (point))
+        (item (thing-at-point 'line t)))
+    (if (org-at-item-p)
+        (progn
+          (kill-whole-line)
+          (if (search-forward-regexp "^\\*+ Archive$" nil t)
+              (org-end-of-subtree) ; Move to the end of the Backup subtree
+            (progn
+              (goto-char (point-max)) ; Go to the end of the buffer
+              (insert "\n* Archive\n"))) ; Create Backup headline
+          ;; Paste the item under the Backup headline
+          (open-line 1)
+          (forward-line 1)
+          (yank))
+      (message "Not on an org-mode item!"))
+    (goto-char start-point)))
+
+(defun 8fold-keep-or-archive ()
+  "Prompt to either keep the current sentence or send it to the archive."
+  (interactive)
+  (let ((keep-or-archive (completing-read "Keep this sentence, or Archive it: " '("Keep" "Archive"))))
+    (if (string-equal-ignore-case keep-or-archive "Archive")
+        (call-interactively #'8fold-archive-line))))
 
 (defun 8fold-iterate-and-select ()
-  "Iterate through pairs of sentences and select one from the pair to keep. Archive the other.")
+  "Iterate through pairs of sentences and select one from the pair to keep. Archive the other."
+  (interactive)
+  (beginning-of-buffer)
+  (while (not (8fold-in-archive))
+    (if (org-at-item-p)
+        (progn
+          (8fold-keep-or-archive)
+          (forward-line))
+      (forward-line))))
+
+(defvar 8fold-reorder ()
+  "Reorder the paragraphs."
+  (interactive)
+  (message "Reorder the paragraphs by moving the headlines around."))
 
 (defvar 8fold-step-actions-alist
-  '((1 . (call-interactively #'8fold-create-outline))
-    (2 . (call-interactively #'8fold-cleanup))
-    (3 . (call-interactively #'8fold-interleave))
-    (4 . (call-interactively #'8fold-iterate-and-select))
-    (5.  (call-interactively #'8fold-reordser))
-    (6 . (call-interactively #'8fold-convert-to-paragraphs-and-read))
-    (7 . (call-interactively #'8fold-rewrite-outline))
-    (8 . (call-interactively #'8fold-fillin-new-from-old))))
+  '((1 . (progn
+           (call-interactively #'8fold-create-outline)
+           (message "Write the topic for each paragraph as headlines. Write each sentence on a separate list item. Add new sections as needed with 8fold-add-section. When the first draft is done, continue to the next step.")))
+    (2 . (progn
+           (call-interactively #'8fold-cleanup)
+           (call-interactively #'8fold-interleave)
+           (message "Now, rewrite each sentence in the newly created blank list items, then progress to the next step.")))
+    (3 . (progn
+           (message "Select which versions of each sentence to keep or send to the Archive.")
+           (call-interactively #'8fold-iterate-and-select)))
+    (4 . (call-interactively #'8fold-reorder))
+    (5 . (progn
+           (call-interactively #'8fold-convert-to-paragraphs)
+           (message "Read what you've written aloud.")))
+    (6 . (call-interactively #'8fold-rewrite-outline))
+    (7 . (call-interactively #'8fold-fillin-new-from-old))))
 
 (defvar 8fold-step-from-to-alist
   '((0 . 1)
@@ -171,8 +232,7 @@ nEnter the number of sections:")
     (4 . 5)
     (5 . 6)
     (6 . 7)
-    (7 . 8)
-    (8. 2)))
+    (7 . 2)))
 
 (defun 8fold-goto-step ()
   "Go to the Nth 8fold-step."
