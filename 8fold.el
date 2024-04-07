@@ -119,12 +119,7 @@ nEnter the number of sections:")
   "Is the org heading or item on this line blank?"
   (interactive)
   (let ((empty-heading-p (and (org-at-heading-p) (not (nth 4 (org-heading-components)))))
-        (empty-item-p (and (org-at-item-p) (org-in-regexp "^[[:blank:]]*\-[[:blank:]]$"))))
-    
-    (message (format-message "returns: %s empty-heading-p: %s empty-item-p: %s"
-                             (or empty-heading-p empty-item-p)
-                             (or empty-heading-p "nil")
-                             (or empty-item-p "nil")))  
+        (empty-item-p (and (org-at-item-p) (org-in-regexp "^[[:blank:]]*\-[[:blank:]]$"))))    
     (or empty-heading-p empty-item-p)))
 
 (defun 8fold-in-archive ()
