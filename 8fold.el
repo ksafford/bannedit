@@ -89,28 +89,39 @@ nEnter the number of sections:")
   (org-next-item)
   (org-in-item-p))
 
-(defun 8fold-interleave-in-heading ()
-  "Add a new line after each sentence in a single heading."
-  (let ((users-org-list-use-circular-motion org-list-use-circular-motion)
-        (8fold-still-in-list-p t))
-    (setq org-list-use-circular-motion nil)
-    (org-beginning-of-item-list)
-    (while 8fold-still-in-list-p
-      (setq 8fold-still-in-list-p (8fold-add-next-list-item)))
-    ;; Reset org-next-item to whatever the user had it before invoking.
-    (setq org-list-use-circular-motion users-org-list-use-circular-motion)))
+;; (defun 8fold-interleave-in-heading ()
+;;   "Add a new line after each sentence in a single heading."
+;;   (let ((users-org-list-use-circular-motion org-list-use-circular-motion)
+;;         (8fold-still-in-list-p t))
+;;     (setq org-list-use-circular-motion nil)
+;;     (next-line)
+;;     (org-beginning-of-item-list)
+;;     (while 8fold-still-in-list-p
+;;       (setq 8fold-still-in-list-p (8fold-add-next-list-item)))
+;;     ;; Reset org-next-item to whatever the user had it before invoking.
+;;     (setq org-list-use-circular-motion users-org-list-use-circular-motion)))
 
-;; TODO mark the location and return to it after interleave, somehow
+(defun 8fold-interleave-in-heading ()
+  "Add a new line after each sentence in a single heading. Do nothing if in the Archive."
+  (interactive)
+  (if (8fold-in-archive)
+      ()
+    (if (org-at-heading-p) 
+        (next-line)
+      (org-beginning-of-item-list))
+    (while (and (org-in-item-p) (not (eobp)))
+      (if (8fold-heading-or-item-is-blank-p)
+          (next-line)
+        (progn
+          (end-of-line)
+          (org-insert-item)
+          (next-line))))))
+
 (defun 8fold-interleave ()
   "Interleave all headings."
   (interactive)
-  (beginning-of-buffer)
-  
-  (while 't
-    (progn
-      (next-line)
-      (8fold-interleave-in-heading)
-      (call-interactively #'org-next-visible-heading))))
+  (org-map-entries (lambda () (8fold-interleave-in-heading)))
+  (beginning-of-buffer))
 
 ;; TODO improve this function: list items might be indicated by:
 ;; arrows, number with a dot like 1. or a paren like 1), etc.
@@ -119,9 +130,8 @@ nEnter the number of sections:")
 (defun 8fold-heading-or-item-is-blank-p ()
   "Is the org heading or item on this line blank?"
   (interactive)
-  (let(
-       (empty-heading-p (and (org-at-heading-p) (not (nth 4 (org-heading-components)))))
-       (empty-item-p (and (org-at-item-p) (org-in-regexp "^[[:blank:]]*\-[[:blank:]]$"))))
+  (let ((empty-heading-p (and (org-at-heading-p) (not (nth 4 (org-heading-components)))))
+        (empty-item-p (and (org-at-item-p) (org-in-regexp "^[[:blank:]]*\-[[:blank:]]$"))))
     
     (message (format-message "returns: %s empty-heading-p: %s empty-item-p: %s"
                              (or empty-heading-p empty-item-p)
@@ -139,7 +149,7 @@ nEnter the number of sections:")
   (interactive)
   (let ((starting-point (point)))
     (beginning-of-buffer)
-    (while (not (8fold-in-archive))
+    (while (not (8fold-in-archive-p))
       (if (8fold-heading-or-item-is-blank-p) 
           (kill-whole-line)
         (forward-line)))
@@ -150,7 +160,7 @@ nEnter the number of sections:")
   (interactive)
   (end-of-buffer)
   
-  (while (8fold-in-archive)
+  (while (8fold-in-archive-p)
     (forward-line -1))
 
   (while (not (eq (point) (point-min)))
@@ -194,14 +204,14 @@ nEnter the number of sections:")
   "Iterate through pairs of sentences and select one from the pair to keep. Archive the other."
   (interactive)
   (beginning-of-buffer)
-  (while (not (8fold-in-archive))
+  (while (not (8fold-in-archive-p))
     (if (org-at-item-p)
         (progn
           (8fold-keep-or-archive)
           (forward-line))
       (forward-line))))
 
-(defvar 8fold-reorder ()
+(defun 8fold-reorder ()
   "Reorder the paragraphs."
   (interactive)
   (message "Reorder the paragraphs by moving the headlines around."))
