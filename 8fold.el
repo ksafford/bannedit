@@ -89,18 +89,6 @@ nEnter the number of sections:")
   (org-next-item)
   (org-in-item-p))
 
-;; (defun 8fold-interleave-in-heading ()
-;;   "Add a new line after each sentence in a single heading."
-;;   (let ((users-org-list-use-circular-motion org-list-use-circular-motion)
-;;         (8fold-still-in-list-p t))
-;;     (setq org-list-use-circular-motion nil)
-;;     (next-line)
-;;     (org-beginning-of-item-list)
-;;     (while 8fold-still-in-list-p
-;;       (setq 8fold-still-in-list-p (8fold-add-next-list-item)))
-;;     ;; Reset org-next-item to whatever the user had it before invoking.
-;;     (setq org-list-use-circular-motion users-org-list-use-circular-motion)))
-
 (defun 8fold-interleave-in-heading ()
   "Add a new line after each sentence in a single heading. Do nothing if in the Archive."
   (interactive)
