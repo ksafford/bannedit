@@ -102,9 +102,6 @@
   ()
   (mapcar #'bannedit-unhighlight badwords))
 
-(bannedit-highlight-banned-words bannedit-words)
-(bannedit-unhighlight-all bannedit-words)
-
 (defun bannedit-toggle-bannedit ()
   "Toggle highlighting of the 'bannedit-words' list. In case you want to keep the mode active but remove or re-enable highlighting."
   (interactive)
